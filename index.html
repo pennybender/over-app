@@ -130,6 +130,12 @@ textarea { width:100%; resize:none; overflow:hidden; }
 .add { margin-top:10px; width:100%; border:1px dashed var(--c); background:var(--tint); color:var(--deep); font-weight:600; }
 .calc { font-size:14px; color:var(--dim); font-variant-numeric:tabular-nums; }
 .out { white-space:pre-wrap; font-size:15px; margin-top:12px; padding:12px; background:var(--tint); border-radius:12px; font-variant-numeric:tabular-nums; }
+.grip { flex:none; display:grid; place-items:center; width:26px; min-height:38px; padding:0; border:0; background:none; color:var(--dim); cursor:grab; touch-action:none; border-radius:8px; }
+.grip:hover { color:var(--ink); background:var(--field); }
+.grip svg { width:12px; height:18px; fill:currentColor; }
+.row.dragging { position:relative; z-index:3; margin:0 -6px; padding-left:6px; padding-right:6px; background:var(--card); border-radius:12px; border-bottom-color:transparent; box-shadow:0 8px 24px rgba(15,25,45,.22); outline:1px solid var(--line); }
+.row.dragging .grip { color:var(--c); cursor:grabbing; }
+body.dragging { -webkit-user-select:none; user-select:none; cursor:grabbing; }
 .set { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; font-size:14px; padding:4px 0; }
 </style>
 </head>
@@ -150,10 +156,10 @@ textarea { width:100%; resize:none; overflow:hidden; }
 <script>
 'use strict';
 const KEY = 'life-data', DIRTY = 'life-dirty', CALVIEW = 'life-calview', FILE = 'life-data.json';
-const SECTIONS = { schedule:'Schedule', calendar:'Calendar', bills:'Bills', appointments:'Appointments', todo:'To do',
+const SECTIONS = { schedule:'Schedule', calendar:'Calendar', bills:'Bills', appointments:'Appointments', todo:'To do', house:'House jobs',
   spend:'Spending priorities', budget:'Budget', money:'Savings & investing', goals:'Goals', challenges:'Challenges', values:'Values' };
 /* One hue (0-360) per section. Change a number to recolour that section everywhere. */
-const HUE = { schedule:214, calendar:262, bills:346, appointments:190, todo:135, spend:30,
+const HUE = { schedule:214, calendar:262, bills:346, appointments:190, todo:135, house:90, spend:30,
   budget:236, money:166, goals:312, challenges:12, values:48 };
 const HOME_HUE = 205;
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -175,8 +181,8 @@ const calKey = e => { const m = dm(e.date).split('/'); return m[1] ? m[1] * 100 
 
 const blank = () => ({
   version: 1,
-  settings: { timezone: '', altAnchor: '', combined: ['schedule','calendar','bills','appointments','todo','spend','money','values'] },
-  schedule: {}, calendar: [], bills: [], appointments: [], todo: [], spend: [],
+  settings: { timezone: '', altAnchor: '', combined: ['schedule','calendar','bills','appointments','todo','house','spend','money','values'] },
+  schedule: {}, calendar: [], bills: [], appointments: [], todo: [], house: [], spend: [],
   budget: { accounts: [], investAccount: '', income: [], fortnightly: [], monthly: [], annual: [], emergencies: [], electricity: [] },
   money: { savingsTarget: 0, savingsBalance: 0, investGoal: 0, mortgageRate: 0, mortgageThreshold: 0, holdings: [] },
   goals: [], challenges: [], values: []
@@ -282,14 +288,86 @@ function select(obj, key, options, label) {
 }
 const setting = (label, control) => h('label', { class: 'set' }, h('span', {}, label), control);
 
+/* ---------- drag to reorder (handle on each row; arrow keys also work) ---------- */
+let drag = null;
+const isRow = el => el && el.classList && el.classList.contains('row');
+const rowsOf = box => [...box.children].filter(isRow);
+/* Put the rows' items back into the slots they came from, in their new order (works for filtered lists too). */
+function reorder(arr, order) {
+  const slots = [...order].sort((a, b) => a - b), vals = order.map(i => arr[i]);
+  slots.forEach((s, k) => { arr[s] = vals[k]; });
+  return slots;
+}
+function commitReorder(box, order, pos) {
+  const slots = reorder(box._arr, order), listNo = [...document.querySelectorAll('.list')].indexOf(box), y = window.scrollY;
+  changed(true); window.scrollTo(0, y);
+  const nb = document.querySelectorAll('.list')[listNo];
+  const g = nb && nb.querySelector('.row[data-i="' + slots[pos] + '"] .grip');
+  if (g) g.focus({ preventScroll: true });
+}
+function dragPos() {
+  const d = drag, row = d.row;
+  row.style.transform = 'translateY(' + (d.y - d.startY + window.scrollY - d.s0) + 'px)';
+  const r = row.getBoundingClientRect(), mid = r.top + r.height / 2;
+  const prev = row.previousElementSibling, next = row.nextElementSibling;
+  /* Move the neighbour, never the dragged row, so the pointer capture is kept. */
+  if (isRow(prev)) { const p = prev.getBoundingClientRect(); if (mid < p.top + p.height / 2) { row.parentNode.insertBefore(prev, row.nextSibling); d.startY -= p.height; return dragPos(); } }
+  if (isRow(next)) { const n = next.getBoundingClientRect(); if (mid > n.top + n.height / 2) { row.parentNode.insertBefore(next, row); d.startY += n.height; return dragPos(); } }
+}
+function dragTick() {
+  if (!drag) return;
+  const top = $('head').getBoundingClientRect().bottom + 60, bot = window.innerHeight - 60;
+  if (drag.y < top) window.scrollBy(0, -Math.ceil((top - drag.y) / 6));
+  else if (drag.y > bot) window.scrollBy(0, Math.ceil((drag.y - bot) / 6));
+  dragPos();
+  drag.raf = requestAnimationFrame(dragTick);
+}
+function dragStart(e, box) {
+  if (drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const g = e.currentTarget, row = g.closest('.row');
+  e.preventDefault();
+  const ae = document.activeElement; if (ae && ae !== g && box.contains(ae)) ae.blur();
+  try { g.setPointerCapture(e.pointerId); } catch (err) {}
+  drag = { box, row, id: e.pointerId, startY: e.clientY, y: e.clientY, s0: window.scrollY, before: rowsOf(box).map(r => r.dataset.i).join() };
+  row.classList.add('dragging'); document.body.classList.add('dragging');
+  drag.raf = requestAnimationFrame(dragTick);
+}
+function dragMove(e) { if (drag && e.pointerId === drag.id) { e.preventDefault(); drag.y = e.clientY; dragPos(); } }
+function dragEnd(e) {
+  if (!drag || (e && e.pointerId !== drag.id)) return;
+  cancelAnimationFrame(drag.raf); dragPos();
+  const { box, row, before } = drag; drag = null;
+  row.style.transform = ''; row.classList.remove('dragging'); document.body.classList.remove('dragging');
+  const rows = rowsOf(box), order = rows.map(r => +r.dataset.i);
+  if (order.join() !== before) commitReorder(box, order, rows.indexOf(row));
+}
+function gripKey(e, box) {
+  if (drag || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+  e.preventDefault();
+  const rows = rowsOf(box), pos = rows.indexOf(e.currentTarget.closest('.row')), j = pos + (e.key === 'ArrowUp' ? -1 : 1);
+  if (pos < 0 || j < 0 || j >= rows.length) return;
+  const order = rows.map(r => +r.dataset.i);
+  [order[pos], order[j]] = [order[j], order[pos]];
+  commitReorder(box, order, j);
+}
+function grip(box) {
+  const g = h('button', { type: 'button', class: 'grip', title: 'Drag to reorder', 'aria-label': 'Move this item. Drag, or use the up and down arrow keys',
+    onpointerdown: e => dragStart(e, box), onpointermove: dragMove, onpointerup: dragEnd, onpointercancel: dragEnd, onlostpointercapture: dragEnd, onkeydown: e => gripKey(e, box) });
+  g.innerHTML = '<svg viewBox="0 0 12 18" aria-hidden="true"><circle cx="3" cy="3" r="1.6"/><circle cx="9" cy="3" r="1.6"/><circle cx="3" cy="9" r="1.6"/><circle cx="9" cy="9" r="1.6"/><circle cx="3" cy="15" r="1.6"/><circle cx="9" cy="15" r="1.6"/></svg>';
+  return g;
+}
+
 function list(arr, cols, make, o) {
   o = o || {};
-  const box = h('div');
+  const box = h('div', { class: 'list' });
+  box._arr = arr;
+  const visible = arr.filter(it => !o.filter || o.filter(it)).length, canDrag = o.drag !== false && visible > 1;
   let shown = 0;
   arr.forEach((it, i) => {
     if (o.filter && !o.filter(it)) return;
     shown++;
-    box.append(h('div', { class: 'row' },
+    box.append(h('div', { class: 'row', 'data-i': i },
+      canDrag ? grip(box) : null,
       cols.map(c => typeof c === 'function' ? c(it, arr, i) : field(it, c.k, c.t, c.ph, c.cls)),
       h('button', { class: 'del', 'aria-label': 'Delete', onclick: () => { if (confirm('Delete this item?')) { arr.splice(i, 1); changed(true); } } }, '×')));
   });
@@ -427,9 +505,9 @@ const R = {
     const t = today(), c = data.calendar;
     const cols = [{ k: 'date', ph: 'd/m', cls: 'dm' }, { k: 'text', ph: 'Event', cls: 'grow' }];
     if (calView.tab === 'today') return [calToggle('tab'), list(c, cols, () => ({ date: t.dm, text: '' }),
-      { filter: e => dm(e.date) === t.dm, empty: 'Nothing from your calendar today.', add: '+ Add for today' })];
+      { filter: e => dm(e.date) === t.dm, empty: 'Nothing from your calendar today.', add: '+ Add for today', drag: false })];
     c.sort((a, b) => calKey(a) - calKey(b));
-    return [calToggle('tab'), list(c, cols, () => ({ date: '', text: '' }))];
+    return [calToggle('tab'), list(c, cols, () => ({ date: '', text: '' }), { drag: false })];
   },
   bills() {
     const t = today();
@@ -447,6 +525,7 @@ const R = {
       () => ({ name: '', date: '', time: '', notes: '' }), { empty: 'No appointments.' });
   },
   todo() { return list(data.todo, [{ k: 'done', t: 'check', ph: 'Done' }, { k: 'text', ph: 'To do', cls: 'grow' }], () => ({ text: '', done: false })); },
+  house() { return list(data.house, [{ k: 'done', t: 'check', ph: 'Done' }, { k: 'text', ph: 'House job', cls: 'grow' }], () => ({ text: '', done: false })); },
   spend() { return list(data.spend, [{ k: 'done', t: 'check', ph: 'Done' }, { k: 'text', ph: 'Spending priority', cls: 'grow' }], () => ({ text: '', done: false })); },
   budget() {
     const b = data.budget;
@@ -539,6 +618,7 @@ const V = {
         h('span', { class: urgency(a.date, t, 1) }, [txt(a.time), rel(a.date, t, 'ago')].filter(Boolean).join(', '))))), 'No upcoming appointments.');
   },
   todo() { return checklist(data.todo, 'Nothing on your list.', 'Everything is ticked off.'); },
+  house() { return checklist(data.house, 'No house jobs yet.', 'Every house job is done.'); },
   spend() { return checklist(data.spend, 'No spending priorities yet.', 'Every priority is ticked off.'); },
   budget() {
     const p = budgetPlan();
