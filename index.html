@@ -618,7 +618,16 @@ const V = {
         h('span', { class: urgency(a.date, t, 1) }, [txt(a.time), rel(a.date, t, 'ago')].filter(Boolean).join(', '))))), 'No upcoming appointments.');
   },
   todo() { return checklist(data.todo, 'Nothing on your list.', 'Everything is ticked off.'); },
-  house() { return checklist(data.house, 'No house jobs yet.', 'Every house job is done.'); },
+  house() {
+    const real = data.house.filter(x => txt(x.text)), open = real.filter(x => !x.done), done = real.length - open.length;
+    if (!real.length) return h('p', { class: 'note' }, 'No house jobs yet.');
+    const pct = Math.round(done / real.length * 100);
+    return [
+      meter('House jobs done', pct, pct + '%', done + ' of ' + real.length + ' ticked off'),
+      h('h3', {}, 'Still to do'),
+      items(open.map(x => li(null, h('i', { class: 'dot' }), h('span', { class: 't' }, txt(x.text)))), 'Every house job is done.')
+    ];
+  },
   spend() { return checklist(data.spend, 'No spending priorities yet.', 'Every priority is ticked off.'); },
   budget() {
     const p = budgetPlan();
