@@ -1,0 +1,1053 @@
+{
+ "app": "life-shopping",
+ "version": 1,
+ "updated": "2026-11-19",
+ "week": "Wed 18 Nov to Tue 24 Nov 2026",
+ "note": "First version. Prices marked checked come from price-tracker pages showing current Woolworths prices; the rest are estimates until the weekly update checks them.",
+ "prices": [
+  {
+   "id": "chicken-breast",
+   "name": "Chicken breast fillets",
+   "size": "650g",
+   "price": 9.4,
+   "deal": "2 for $16",
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/8182586245203/rspca-approved-chicken-breast-fillets-650g",
+   "pantry": false
+  },
+  {
+   "id": "chicken-thigh",
+   "name": "Chicken thigh fillets",
+   "size": "500g",
+   "price": 7.75,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/8031583993939/rspca-approved-chicken-thigh-fillet-per-150g",
+   "pantry": false
+  },
+  {
+   "id": "chicken-drumsticks",
+   "name": "Chicken drumsticks (Lovely Legs)",
+   "size": "approx 700g",
+   "price": 7.35,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/browse/all-meat-seafood",
+   "pantry": false
+  },
+  {
+   "id": "chicken-schnitzel",
+   "name": "Chicken breast schnitzels",
+   "size": "400g",
+   "price": 8.5,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/browse/all-meat-seafood",
+   "pantry": false
+  },
+  {
+   "id": "beef-mince",
+   "name": "Beef mince",
+   "size": "1kg",
+   "price": 15.0,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/8036684431443/beef-mince-1kg",
+   "pantry": false
+  },
+  {
+   "id": "pork-mince",
+   "name": "Pork mince",
+   "size": "500g",
+   "price": 6.25,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/browse/all-meat-seafood",
+   "pantry": false
+  },
+  {
+   "id": "lamb-mince",
+   "name": "Lamb mince",
+   "size": "500g",
+   "price": 8.5,
+   "deal": "2 for $15",
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/15390516707411/3-star-lamb-mince-500g",
+   "pantry": false
+  },
+  {
+   "id": "sausages",
+   "name": "Beef sausages 6 pack",
+   "size": "505g",
+   "price": 7.0,
+   "deal": "2 for $12",
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/15389890379859/6-pack-beef-sausages-505g",
+   "pantry": false
+  },
+  {
+   "id": "sizzle-steak",
+   "name": "Beef sizzle steak",
+   "size": "400g",
+   "price": 13.0,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/browse/all-meat-seafood",
+   "pantry": false
+  },
+  {
+   "id": "bacon",
+   "name": "Short cut bacon",
+   "size": "750g",
+   "price": 12.5,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/browse/all-meat-seafood",
+   "pantry": false
+  },
+  {
+   "id": "salmon",
+   "name": "Salmon portions skin on 4 pack",
+   "size": "4 pack",
+   "price": 17.5,
+   "deal": null,
+   "checked": false,
+   "url": "https://buywisely.com.au/au/product/woolworths-salmon-portions-skin-on-4-pack",
+   "pantry": false
+  },
+  {
+   "id": "eggs",
+   "name": "Barn laid eggs 12 pack",
+   "size": "700g",
+   "price": 5.7,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/15389893263443/barn-laid-cage-free-eggs-12-pack-700g",
+   "pantry": false
+  },
+  {
+   "id": "rice",
+   "name": "Long grain rice",
+   "size": "1kg",
+   "price": 2.25,
+   "deal": "Special",
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/8182465003603/sunrice-premium-long-grain-rice-1kg",
+   "pantry": true
+  },
+  {
+   "id": "spaghetti",
+   "name": "Spaghetti",
+   "size": "500g",
+   "price": 0.9,
+   "deal": null,
+   "checked": true,
+   "url": "https://buywisely.com.au/product/essentials-pasta-spaghetti-500g",
+   "pantry": false
+  },
+  {
+   "id": "penne",
+   "name": "Penne",
+   "size": "500g",
+   "price": 0.9,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "egg-noodles",
+   "name": "Egg noodles",
+   "size": "440g",
+   "price": 2.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "wraps",
+   "name": "Wraps 8 pack",
+   "size": "567g",
+   "price": 5.0,
+   "deal": null,
+   "checked": false,
+   "url": "https://www.grocerize.com.au/product/7471550627923/mission-original-wraps-8-pack-567g",
+   "pantry": false
+  },
+  {
+   "id": "bread-rolls",
+   "name": "Bread rolls 6 pack",
+   "size": "6 pack",
+   "price": 3.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "pizza-bases",
+   "name": "Pizza bases 2 pack",
+   "size": "2 pack",
+   "price": 4.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "potatoes",
+   "name": "Washed potatoes",
+   "size": "2kg",
+   "price": 8.0,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/7472260710483/potatoes-washed-2kg",
+   "pantry": false
+  },
+  {
+   "id": "sweet-potato",
+   "name": "Sweet potato",
+   "size": "1kg",
+   "price": 4.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "carrots",
+   "name": "Carrots",
+   "size": "1kg",
+   "price": 1.7,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/8014355300435/carrots-1kg",
+   "pantry": false
+  },
+  {
+   "id": "onions",
+   "name": "Brown onions",
+   "size": "1kg",
+   "price": 3.6,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": true
+  },
+  {
+   "id": "garlic",
+   "name": "Garlic",
+   "size": "each",
+   "price": 1.2,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": true
+  },
+  {
+   "id": "broccoli",
+   "name": "Broccoli",
+   "size": "each",
+   "price": 2.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "capsicum",
+   "name": "Red capsicum",
+   "size": "each",
+   "price": 2.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "zucchini",
+   "name": "Zucchini",
+   "size": "each",
+   "price": 1.18,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/7752146354259/fresh-zucchini-green-each",
+   "pantry": false
+  },
+  {
+   "id": "mushrooms",
+   "name": "Mushrooms",
+   "size": "200g",
+   "price": 3.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "spinach",
+   "name": "Baby spinach",
+   "size": "120g",
+   "price": 3.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "lettuce",
+   "name": "Iceberg lettuce",
+   "size": "each",
+   "price": 3.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "tomatoes",
+   "name": "Tomatoes",
+   "size": "1kg",
+   "price": 6.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "cucumber",
+   "name": "Continental cucumber",
+   "size": "each",
+   "price": 1.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "lemon",
+   "name": "Lemon",
+   "size": "each",
+   "price": 1.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "frozen-veg",
+   "name": "Frozen mixed veg",
+   "size": "1kg",
+   "price": 3.4,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/8057152962643/bell-farms-frozen-winter-veggies-1kg",
+   "pantry": false
+  },
+  {
+   "id": "frozen-peas",
+   "name": "Frozen peas",
+   "size": "1kg",
+   "price": 3.2,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": true
+  },
+  {
+   "id": "diced-tomatoes",
+   "name": "Diced tomatoes",
+   "size": "400g",
+   "price": 1.3,
+   "deal": null,
+   "checked": false,
+   "url": "https://buywisely.com.au/au/product/woolworths-diced-australian-tomatoes-400g",
+   "pantry": false
+  },
+  {
+   "id": "pasta-sauce",
+   "name": "Pasta sauce",
+   "size": "500g",
+   "price": 2.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "coconut-milk",
+   "name": "Coconut milk",
+   "size": "400ml",
+   "price": 1.8,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "curry-paste",
+   "name": "Red curry paste",
+   "size": "jar",
+   "price": 3.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": true
+  },
+  {
+   "id": "chickpeas",
+   "name": "Chickpeas",
+   "size": "400g can",
+   "price": 1.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "soy-sauce",
+   "name": "Soy sauce",
+   "size": "bottle",
+   "price": 2.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": true
+  },
+  {
+   "id": "taco-seasoning",
+   "name": "Taco seasoning",
+   "size": "sachet",
+   "price": 1.5,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  },
+  {
+   "id": "cheese",
+   "name": "Tasty cheese block",
+   "size": "250g",
+   "price": 4.9,
+   "deal": null,
+   "checked": true,
+   "url": "https://www.grocerize.com.au/product/7607265460307/tasty-cheese-block-250g",
+   "pantry": false
+  },
+  {
+   "id": "sour-cream",
+   "name": "Sour cream",
+   "size": "300ml",
+   "price": 3.0,
+   "deal": null,
+   "checked": false,
+   "url": null,
+   "pantry": false
+  }
+ ],
+ "dinners": [
+  {
+   "id": "spaghetti-bolognese",
+   "name": "Spaghetti bolognese",
+   "serves": 4,
+   "tags": [
+    "family"
+   ],
+   "ingredients": [
+    {
+     "item": "beef-mince",
+     "use": 0.5
+    },
+    {
+     "item": "spaghetti",
+     "use": 1
+    },
+    {
+     "item": "diced-tomatoes",
+     "use": 2
+    },
+    {
+     "item": "onions",
+     "use": 0.15
+    },
+    {
+     "item": "carrots",
+     "use": 0.2
+    },
+    {
+     "item": "garlic",
+     "use": 0.3
+    },
+    {
+     "item": "cheese",
+     "use": 0.3
+    }
+   ]
+  },
+  {
+   "id": "chicken-and-veg-stir-fry-with-rice",
+   "name": "Chicken and veg stir-fry with rice",
+   "serves": 4,
+   "tags": [
+    "quick"
+   ],
+   "ingredients": [
+    {
+     "item": "chicken-thigh",
+     "use": 1
+    },
+    {
+     "item": "rice",
+     "use": 0.4
+    },
+    {
+     "item": "broccoli",
+     "use": 1
+    },
+    {
+     "item": "capsicum",
+     "use": 1
+    },
+    {
+     "item": "carrots",
+     "use": 0.15
+    },
+    {
+     "item": "soy-sauce",
+     "use": 0.15
+    },
+    {
+     "item": "garlic",
+     "use": 0.3
+    }
+   ]
+  },
+  {
+   "id": "beef-tacos",
+   "name": "Beef tacos",
+   "serves": 4,
+   "tags": [
+    "family"
+   ],
+   "ingredients": [
+    {
+     "item": "beef-mince",
+     "use": 0.5
+    },
+    {
+     "item": "wraps",
+     "use": 1
+    },
+    {
+     "item": "taco-seasoning",
+     "use": 1
+    },
+    {
+     "item": "lettuce",
+     "use": 0.5
+    },
+    {
+     "item": "tomatoes",
+     "use": 0.25
+    },
+    {
+     "item": "cheese",
+     "use": 0.4
+    },
+    {
+     "item": "sour-cream",
+     "use": 0.5
+    }
+   ]
+  },
+  {
+   "id": "sausages-mash-and-veg",
+   "name": "Sausages, mash and veg",
+   "serves": 4,
+   "tags": [
+    "easy"
+   ],
+   "ingredients": [
+    {
+     "item": "sausages",
+     "use": 1.5
+    },
+    {
+     "item": "potatoes",
+     "use": 0.5
+    },
+    {
+     "item": "frozen-veg",
+     "use": 0.4
+    },
+    {
+     "item": "onions",
+     "use": 0.15
+    }
+   ]
+  },
+  {
+   "id": "crispy-skin-salmon-potatoes-and-broccoli",
+   "name": "Crispy-skin salmon, potatoes and broccoli",
+   "serves": 4,
+   "tags": [
+    "healthy"
+   ],
+   "ingredients": [
+    {
+     "item": "salmon",
+     "use": 1
+    },
+    {
+     "item": "potatoes",
+     "use": 0.4
+    },
+    {
+     "item": "broccoli",
+     "use": 1
+    },
+    {
+     "item": "lemon",
+     "use": 1
+    }
+   ]
+  },
+  {
+   "id": "thai-red-chicken-curry-with-rice",
+   "name": "Thai red chicken curry with rice",
+   "serves": 4,
+   "tags": [
+    "spicy"
+   ],
+   "ingredients": [
+    {
+     "item": "chicken-thigh",
+     "use": 1
+    },
+    {
+     "item": "coconut-milk",
+     "use": 1
+    },
+    {
+     "item": "curry-paste",
+     "use": 0.5
+    },
+    {
+     "item": "capsicum",
+     "use": 1
+    },
+    {
+     "item": "frozen-veg",
+     "use": 0.3
+    },
+    {
+     "item": "rice",
+     "use": 0.4
+    }
+   ]
+  },
+  {
+   "id": "lamb-kofta-wraps-with-salad",
+   "name": "Lamb kofta wraps with salad",
+   "serves": 4,
+   "tags": [
+    "quick"
+   ],
+   "ingredients": [
+    {
+     "item": "lamb-mince",
+     "use": 1
+    },
+    {
+     "item": "wraps",
+     "use": 1
+    },
+    {
+     "item": "cucumber",
+     "use": 1
+    },
+    {
+     "item": "tomatoes",
+     "use": 0.2
+    },
+    {
+     "item": "lettuce",
+     "use": 0.4
+    },
+    {
+     "item": "garlic",
+     "use": 0.2
+    },
+    {
+     "item": "onions",
+     "use": 0.1
+    }
+   ]
+  },
+  {
+   "id": "chicken-schnitzel-chips-and-salad",
+   "name": "Chicken schnitzel, chips and salad",
+   "serves": 4,
+   "tags": [
+    "family"
+   ],
+   "ingredients": [
+    {
+     "item": "chicken-schnitzel",
+     "use": 2
+    },
+    {
+     "item": "potatoes",
+     "use": 0.5
+    },
+    {
+     "item": "lettuce",
+     "use": 0.5
+    },
+    {
+     "item": "tomatoes",
+     "use": 0.2
+    },
+    {
+     "item": "cucumber",
+     "use": 0.5
+    }
+   ]
+  },
+  {
+   "id": "bacon-and-egg-fried-rice",
+   "name": "Bacon and egg fried rice",
+   "serves": 4,
+   "tags": [
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "item": "rice",
+     "use": 0.4
+    },
+    {
+     "item": "eggs",
+     "use": 0.5
+    },
+    {
+     "item": "bacon",
+     "use": 0.3
+    },
+    {
+     "item": "frozen-peas",
+     "use": 0.3
+    },
+    {
+     "item": "soy-sauce",
+     "use": 0.1
+    },
+    {
+     "item": "onions",
+     "use": 0.1
+    }
+   ]
+  },
+  {
+   "id": "pork-and-noodle-stir-fry",
+   "name": "Pork and noodle stir-fry",
+   "serves": 4,
+   "tags": [
+    "quick"
+   ],
+   "ingredients": [
+    {
+     "item": "pork-mince",
+     "use": 1
+    },
+    {
+     "item": "egg-noodles",
+     "use": 1
+    },
+    {
+     "item": "carrots",
+     "use": 0.2
+    },
+    {
+     "item": "capsicum",
+     "use": 1
+    },
+    {
+     "item": "soy-sauce",
+     "use": 0.15
+    },
+    {
+     "item": "garlic",
+     "use": 0.3
+    }
+   ]
+  },
+  {
+   "id": "chicken-drumstick-tray-bake",
+   "name": "Chicken drumstick tray bake",
+   "serves": 4,
+   "tags": [
+    "easy"
+   ],
+   "ingredients": [
+    {
+     "item": "chicken-drumsticks",
+     "use": 1.5
+    },
+    {
+     "item": "potatoes",
+     "use": 0.5
+    },
+    {
+     "item": "carrots",
+     "use": 0.3
+    },
+    {
+     "item": "zucchini",
+     "use": 2
+    },
+    {
+     "item": "onions",
+     "use": 0.2
+    }
+   ]
+  },
+  {
+   "id": "bacon-and-pea-pasta",
+   "name": "Bacon and pea pasta",
+   "serves": 4,
+   "tags": [
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "item": "spaghetti",
+     "use": 1
+    },
+    {
+     "item": "bacon",
+     "use": 0.35
+    },
+    {
+     "item": "eggs",
+     "use": 0.35
+    },
+    {
+     "item": "cheese",
+     "use": 0.4
+    },
+    {
+     "item": "frozen-peas",
+     "use": 0.2
+    }
+   ]
+  },
+  {
+   "id": "lamb-shepherds-pie",
+   "name": "Lamb shepherd's pie",
+   "serves": 4,
+   "tags": [
+    "family"
+   ],
+   "ingredients": [
+    {
+     "item": "lamb-mince",
+     "use": 1
+    },
+    {
+     "item": "potatoes",
+     "use": 0.5
+    },
+    {
+     "item": "frozen-veg",
+     "use": 0.5
+    },
+    {
+     "item": "onions",
+     "use": 0.15
+    },
+    {
+     "item": "carrots",
+     "use": 0.2
+    },
+    {
+     "item": "cheese",
+     "use": 0.2
+    }
+   ]
+  },
+  {
+   "id": "chicken-and-spinach-pasta-bake",
+   "name": "Chicken and spinach pasta bake",
+   "serves": 4,
+   "tags": [
+    "family"
+   ],
+   "ingredients": [
+    {
+     "item": "chicken-breast",
+     "use": 1
+    },
+    {
+     "item": "penne",
+     "use": 1
+    },
+    {
+     "item": "pasta-sauce",
+     "use": 1
+    },
+    {
+     "item": "cheese",
+     "use": 0.4
+    },
+    {
+     "item": "zucchini",
+     "use": 1
+    },
+    {
+     "item": "spinach",
+     "use": 0.5
+    }
+   ]
+  },
+  {
+   "id": "steak-sandwiches",
+   "name": "Steak sandwiches",
+   "serves": 4,
+   "tags": [
+    "quick"
+   ],
+   "ingredients": [
+    {
+     "item": "sizzle-steak",
+     "use": 1.5
+    },
+    {
+     "item": "bread-rolls",
+     "use": 1
+    },
+    {
+     "item": "lettuce",
+     "use": 0.4
+    },
+    {
+     "item": "tomatoes",
+     "use": 0.2
+    },
+    {
+     "item": "onions",
+     "use": 0.2
+    },
+    {
+     "item": "cheese",
+     "use": 0.25
+    }
+   ]
+  },
+  {
+   "id": "chickpea-and-sweet-potato-curry",
+   "name": "Chickpea and sweet potato curry",
+   "serves": 4,
+   "tags": [
+    "vegetarian",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "item": "chickpeas",
+     "use": 2
+    },
+    {
+     "item": "coconut-milk",
+     "use": 1
+    },
+    {
+     "item": "curry-paste",
+     "use": 0.5
+    },
+    {
+     "item": "spinach",
+     "use": 1
+    },
+    {
+     "item": "sweet-potato",
+     "use": 0.5
+    },
+    {
+     "item": "rice",
+     "use": 0.4
+    }
+   ]
+  },
+  {
+   "id": "potato-and-spinach-frittata",
+   "name": "Potato and spinach frittata",
+   "serves": 4,
+   "tags": [
+    "vegetarian",
+    "budget"
+   ],
+   "ingredients": [
+    {
+     "item": "eggs",
+     "use": 0.8
+    },
+    {
+     "item": "potatoes",
+     "use": 0.25
+    },
+    {
+     "item": "spinach",
+     "use": 0.5
+    },
+    {
+     "item": "cheese",
+     "use": 0.3
+    },
+    {
+     "item": "onions",
+     "use": 0.1
+    },
+    {
+     "item": "zucchini",
+     "use": 1
+    }
+   ]
+  },
+  {
+   "id": "homemade-pizzas",
+   "name": "Homemade pizzas",
+   "serves": 4,
+   "tags": [
+    "family"
+   ],
+   "ingredients": [
+    {
+     "item": "pizza-bases",
+     "use": 1
+    },
+    {
+     "item": "pasta-sauce",
+     "use": 0.3
+    },
+    {
+     "item": "cheese",
+     "use": 0.6
+    },
+    {
+     "item": "bacon",
+     "use": 0.25
+    },
+    {
+     "item": "capsicum",
+     "use": 1
+    },
+    {
+     "item": "mushrooms",
+     "use": 1
+    }
+   ]
+  }
+ ]
+}
