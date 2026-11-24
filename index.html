@@ -531,10 +531,25 @@ function loadShop() {
 }
 const itemPrice = p => { const o = data.shop.overrides[p.id]; return o != null && o !== '' ? num(o) : num(p.price); };
 const clampInt = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(num(v)) || lo));
-const findPrice = name => { const n = txt(name).toLowerCase(); return n ? ((shopFile && shopFile.prices) || []).find(p => p.name.toLowerCase() === n) : null; };
+/* Staples link to a price entry by its fixed id, so renamed products and new prices update the same row. */
+const allPrices = () => (shopFile && shopFile.prices) || [];
+const priceById = id => id ? allPrices().find(p => p.id === id) || null : null;
+const findPrice = name => { const n = txt(name).toLowerCase(); return n ? allPrices().find(p => p.name.toLowerCase() === n || (p.aliases || []).some(a => a.toLowerCase() === n)) || null : null; };
+const stapleItem = s => priceById(s.pid) || findPrice(s.text);
+function linkStaples() {
+  if (!shopFile) return;
+  let moved = false;
+  data.shop.staples.forEach(st => {
+    const p = stapleItem(st);
+    if (!p) return;
+    if (st.pid !== p.id) { st.pid = p.id; moved = true; }
+    if (st.text !== p.name) { st.text = p.name; moved = true; }
+  });
+  if (moved) store();
+}
 function staplePrice(s) {
   if (num(s.price) > 0) return num(s.price);
-  const p = findPrice(s.text);
+  const p = stapleItem(s);
   return p ? itemPrice(p) : null;
 }
 const stQty = s => s.qty == null || s.qty === '' ? 1 : num(s.qty);
@@ -587,9 +602,10 @@ function gotMap() {
   return s.got;
 }
 function shopList() {
+  linkStaples();
   const g = gotMap(), rows = [], money = [];
   data.shop.staples.filter(st => txt(st.text)).forEach(st => {
-    const key = txt(st.text).toLowerCase(), each = staplePrice(st), p = findPrice(st.text);
+    const key = st.pid || txt(st.text).toLowerCase(), each = staplePrice(st), p = stapleItem(st);
     const c = h('input', { type: 'checkbox', checked: !!g.k[key], 'aria-label': 'Got ' + txt(st.text) });
     const q = h('input', { type: 'text', inputmode: 'decimal', class: 'dm', value: stQty(st), 'aria-label': 'How many ' + txt(st.text) });
     const sub = [p ? p.size : null, p && p.deal ? p.deal : null, each == null ? 'no price yet' : null].filter(Boolean).join(' · ');
@@ -609,6 +625,7 @@ function shopStatus() {
   return 'Woolworths prices updated ' + nice(shopFile.updated) + '.' + (shopErr ? ' ' + shopErr : '');
 }
 function shopEdit() {
+  linkStaples();
   const s = data.shop, st = dinnerStats(), out = [];
   const n = (key, label, lo, hi) => {
     const i = h('input', { type: 'text', inputmode: 'decimal', class: 'amt', value: s[key], 'aria-label': label });
@@ -634,16 +651,16 @@ function shopEdit() {
     h('p', { class: 'note' }, 'Pick an item from the suggestions to use its Woolworths price, which is checked every Wednesday, or type your own price. ' + shopStatus()),
     h('datalist', { id: 'shopItems' }, ((shopFile && shopFile.prices) || []).map(p => h('option', { value: p.name }))),
     list(s.staples, [
-      it => { const i = field(it, 'text', 'text', 'Item', 'grow'); i.setAttribute('list', 'shopItems'); i.addEventListener('change', () => changed(true)); return i; },
+      it => { const i = field(it, 'text', 'text', 'Item', 'grow'); i.setAttribute('list', 'shopItems'); i.addEventListener('change', () => { delete it.pid; changed(true); }); return i; },
       { k: 'qty', t: 'number', ph: 'How many', cls: 'dm' },
-      it => { const i = field(it, 'price', 'number', '$', 'amt'), p = findPrice(it.text);
+      it => { const i = field(it, 'price', 'number', '$', 'amt'), p = stapleItem(it);
         if (!num(it.price)) i.value = ''; if (p) i.placeholder = itemPrice(p).toFixed(2); i.setAttribute('aria-label', 'Price each, blank uses the Woolworths price'); return i; },
       it => calc(() => { const p = staplePrice(it); return p == null ? 'no price' : cash(p * stQty(it)); })
     ], () => ({ text: '', qty: 1, price: 0 }), { empty: 'No staples yet.', add: '+ Add staple' }),
     (() => {
-      const have = new Set(s.staples.map(x => txt(x.text).toLowerCase()));
-      const missing = ((shopFile && shopFile.prices) || []).filter(p => !have.has(p.name.toLowerCase()));
-      return missing.length ? h('button', { class: 'add', onclick: () => { missing.forEach(p => s.staples.push({ text: p.name, qty: 1, price: 0 })); changed(true); } },
+      const have = new Set(s.staples.map(x => x.pid).filter(Boolean));
+      const missing = allPrices().filter(p => !have.has(p.id));
+      return missing.length ? h('button', { class: 'add', onclick: () => { missing.forEach(p => s.staples.push({ text: p.name, pid: p.id, qty: 1, price: 0 })); changed(true); } },
         '+ Add the ' + missing.length + ' price-checked item' + (missing.length === 1 ? '' : 's') + ' not on your list') : null;
     })(),
     h('p', { class: 'total' }, h('span', {}, 'Staples total'), calc(() => cash(staplesTotal()), null, 'b')));
@@ -652,6 +669,7 @@ function shopEdit() {
 let shopListOpen = false;
 try { shopListOpen = localStorage.getItem('life-shoplist') === '1'; } catch (e) {}
 function shopOverview() {
+  linkStaples();
   const st = dinnerStats();
   return [
     dinnerMeter(st),

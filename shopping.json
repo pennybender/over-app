@@ -13,7 +13,8 @@
    "deal": null,
    "checked": false,
    "url": "https://www.woolworths.com.au/shop/productdetails/88436",
-   "pantry": false
+   "pantry": false,
+   "aliases": []
   },
   {
    "id": "celery-sticks",
@@ -23,7 +24,10 @@
    "deal": null,
    "checked": false,
    "url": null,
-   "pantry": false
+   "pantry": false,
+   "aliases": [
+    "Celery sticks (Macro Organic)"
+   ]
   },
   {
    "id": "cheese",
@@ -33,7 +37,10 @@
    "deal": null,
    "checked": false,
    "url": "https://www.grocerize.com.au/product/7902372429907/norco-natural-cheese-block-500g",
-   "pantry": false
+   "pantry": false,
+   "aliases": [
+    "Bega tasty cheese block"
+   ]
   },
   {
    "id": "ritz",
@@ -43,7 +50,8 @@
    "deal": null,
    "checked": false,
    "url": "https://www.woolworths.com.au/shop/productdetails/261282/ritz-original-crackers",
-   "pantry": false
+   "pantry": false,
+   "aliases": []
   },
   {
    "id": "coffee",
@@ -53,7 +61,8 @@
    "deal": null,
    "checked": true,
    "url": "https://www.grocerize.com.au/product/7795840942163/harris-coffee-ground-smooth-200g",
-   "pantry": false
+   "pantry": false,
+   "aliases": []
   },
   {
    "id": "bananas",
@@ -63,7 +72,8 @@
    "deal": null,
    "checked": false,
    "url": "https://www.woolworths.com.au/shop/productdetails/133211",
-   "pantry": false
+   "pantry": false,
+   "aliases": []
   },
   {
    "id": "greek-yoghurt",
@@ -73,7 +83,10 @@
    "deal": null,
    "checked": false,
    "url": null,
-   "pantry": false
+   "pantry": false,
+   "aliases": [
+    "Jalna Greek natural yoghurt"
+   ]
   },
   {
    "id": "butter",
@@ -83,7 +96,10 @@
    "deal": null,
    "checked": false,
    "url": "https://www.woolworths.com.au/shop/productdetails/712233/westgold-salted-butter-butter",
-   "pantry": false
+   "pantry": false,
+   "aliases": [
+    "Western Star butter"
+   ]
   },
   {
    "id": "strawberries",
@@ -93,7 +109,8 @@
    "deal": null,
    "checked": false,
    "url": "https://www.woolworths.com.au/shop/productdetails/144607/strawberries-punnet",
-   "pantry": false
+   "pantry": false,
+   "aliases": []
   },
   {
    "id": "yoghurt-pouch",
@@ -103,7 +120,10 @@
    "deal": null,
    "checked": false,
    "url": "https://www.grocerize.com.au/product/7967204180051/tamar-valley-kids-greek-style-pouch-yoghurt-banana-110g",
-   "pantry": false
+   "pantry": false,
+   "aliases": [
+    "Yoplait Petit Miam yoghurt pouch, no added sugar"
+   ]
   }
  ],
  "dinners": []
