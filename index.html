@@ -205,7 +205,7 @@ const blank = () => ({
   schedule: {}, calendar: [], bills: [], appointments: [], todo: [], house: [], spend: [],
   budget: { accounts: [], investAccount: '', income: [], fortnightly: [], monthly: [], annual: [], emergencies: [], electricity: [] },
   money: { savingsTarget: 0, savingsBalance: 0, investGoal: 0, mortgageRate: 0, mortgageThreshold: 0, holdings: [] },
-  shop: { budget: 100, nights: 5, people: 4, staples: [], overrides: {}, picks: null, got: null },
+  shop: { budget: 100, nights: 4, staples: [], overrides: {}, spend: null, history: [], got: null },
   goals: [], challenges: [], values: []
 });
 function normalise(d) {
@@ -215,6 +215,7 @@ function normalise(d) {
   out.money = Object.assign(b.money, d.money);
   out.shop = Object.assign(b.shop, d.shop);
   if (!Array.isArray(out.shop.staples)) out.shop.staples = [];
+  if ('picks' in out.shop) { delete out.shop.picks; delete out.shop.people; out.shop.nights = 4; } /* old dinner-ideas version */
   if (!out.shop.overrides || typeof out.shop.overrides !== 'object') out.shop.overrides = {};
   return out;
 }
@@ -528,13 +529,8 @@ function loadShop() {
       if (before !== shopErr && data) render();
     });
 }
-const shopPrices = () => { const m = {}; ((shopFile && shopFile.prices) || []).forEach(p => { m[p.id] = p; }); return m; };
 const itemPrice = p => { const o = data.shop.overrides[p.id]; return o != null && o !== '' ? num(o) : num(p.price); };
 const clampInt = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(num(v)) || lo));
-const people = () => clampInt(data.shop.people, 1, 20);
-const nights = () => clampInt(data.shop.nights, 1, 14);
-const servingsFor = d => { const o = data.shop.picks && data.shop.picks.serv && data.shop.picks.serv[d.id]; return o != null ? o : people(); };
-const dinnerScale = d => servingsFor(d) / (num(d.serves) || 4);
 const findPrice = name => { const n = txt(name).toLowerCase(); return n ? ((shopFile && shopFile.prices) || []).find(p => p.name.toLowerCase() === n) : null; };
 function staplePrice(s) {
   if (num(s.price) > 0) return num(s.price);
@@ -543,142 +539,97 @@ function staplePrice(s) {
 }
 const stQty = s => s.qty == null || s.qty === '' ? 1 : num(s.qty);
 const staplesTotal = () => data.shop.staples.reduce((t, s) => t + (staplePrice(s) || 0) * stQty(s), 0);
-function dinnerShare(d) {
-  const P = shopPrices(), sc = dinnerScale(d);
-  return d.ingredients.reduce((t, i) => t + (P[i.item] ? i.use * sc * itemPrice(P[i.item]) : 0), 0);
+
+/* ---------- dinner spending: a few blank dinners a week; you type what each one cost ---------- */
+function weekStart(iso) {
+  const n = dayNum(iso), wd = (new Date(n * 864e5).getUTCDay() + 6) % 7, d = new Date((n - wd) * 864e5);
+  return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
 }
-/* What the dinners cost to buy: whole packs, except pantry items, which count only the share used. */
-function planCost(ds) {
-  const P = shopPrices(), need = {};
-  ds.forEach(d => { const sc = dinnerScale(d); d.ingredients.forEach(i => { need[i.item] = (need[i.item] || 0) + i.use * sc; }); });
-  let total = 0; const lines = [];
-  Object.keys(need).forEach(id => {
-    const p = P[id]; if (!p) return;
-    const packs = Math.max(1, up(need[id] - 1e-6)), cost = p.pantry ? need[id] * itemPrice(p) : packs * itemPrice(p);
-    total += cost; lines.push({ p, need: need[id], packs, cost });
-  });
-  return { total, lines };
-}
-const dinnersById = ids => ids.map(id => ((shopFile && shopFile.dinners) || []).find(d => d.id === id)).filter(Boolean);
-/* Random mixes of dinners; keep the ones within budget and pick one of them. With no mix in budget, take the cheapest. */
-function pickPlan(keep, exclude) {
-  const D = (shopFile && shopFile.dinners) || [], k = Math.min(nights(), D.length), budget = num(data.shop.budget);
-  const fixed = dinnersById(keep || []).slice(0, k), rest = D.filter(d => !fixed.includes(d) && !(exclude || []).includes(d.id));
-  let best = null; const ok = [];
-  for (let t = 0; t < 3000 && ok.length < 40; t++) {
-    const a = rest.slice();
-    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-    const combo = fixed.concat(a.slice(0, k - fixed.length)), c = planCost(combo).total;
-    if (!best || c < best.c) best = { combo, c };
-    if (!budget || c <= budget + 1e-9) ok.push(combo);
+const dinnerCount = () => clampInt(data.shop.nights, 1, 14);
+/* Each Monday the last week's dinner spending moves into the history and the dinners start blank. */
+function spendWeek() {
+  const s = data.shop, wk = weekStart(today().iso);
+  if (!s.spend || typeof s.spend !== 'object' || !Array.isArray(s.spend.slots)) s.spend = { week: wk, slots: [] };
+  if (s.spend.week !== wk) {
+    const spent = s.spend.slots.reduce((t, x) => t + num(x.spent), 0);
+    if (s.spend.slots.some(x => txt(x.spent) !== '' && x.spent != null)) {
+      s.history = (s.history || []).filter(x => x.week !== s.spend.week);
+      s.history.unshift({ week: s.spend.week, spent, budget: num(s.budget), dinners: s.spend.slots.length });
+      s.history = s.history.slice(0, 26);
+    }
+    s.spend = { week: wk, slots: [] };
+    store();
   }
-  const chosen = ok.length ? ok[Math.floor(Math.random() * ok.length)] : best && best.combo;
-  return (chosen || []).map(d => d.id);
+  while (s.spend.slots.length < dinnerCount()) s.spend.slots.push({ name: '', spent: null });
+  return s.spend;
 }
-const planSig = () => [num(data.shop.budget), nights()].join('|');
-function currentPlan() {
-  if (!shopFile || !shopFile.dinners.length) return [];
-  const s = data.shop, week = shopFile.updated || '';
-  let ids = s.picks && s.picks.week === week && s.picks.sig === planSig() ? dinnersById(s.picks.ids).map(d => d.id) : null;
-  if (!ids || ids.length !== Math.min(nights(), shopFile.dinners.length)) {
-    ids = pickPlan();
-    s.picks = { week, sig: planSig(), ids }; store();
-  }
-  return dinnersById(ids);
+function dinnerStats() {
+  const sp = spendWeek(), slots = sp.slots.slice(0, dinnerCount()), b = num(data.shop.budget);
+  const filled = slots.filter(x => x.spent != null && txt(x.spent) !== ''), spent = filled.reduce((t, x) => t + num(x.spent), 0);
+  const left = slots.length - filled.length, remain = b - spent;
+  return { slots, spent, b, left, remain, each: left ? remain / left : 0, over: b && spent > b + 1e-9 };
 }
-function setPicks(ids) { const old = (data.shop.picks && data.shop.picks.serv) || {}, serv = {}; ids.forEach(id => { if (old[id] != null) serv[id] = old[id]; }); data.shop.picks = { week: shopFile.updated || '', sig: planSig(), ids, serv }; store(); const y = window.scrollY; render(); window.scrollTo(0, y); }
-const useText = (u, size) => (Math.round(u * 100) / 100) + ' × ' + size;
-function servBox(d) {
-  const i = h('input', { type: 'text', inputmode: 'numeric', class: 'dm serv', value: servingsFor(d), 'aria-label': 'Servings of ' + d.name });
-  const stop = e => e.stopPropagation();
-  i.addEventListener('click', e => { e.preventDefault(); stop(e); i.focus(); });
-  i.addEventListener('keydown', stop); i.addEventListener('keyup', e => { stop(e); if (e.key === ' ') e.preventDefault(); });
-  i.addEventListener('change', () => {
-    const p = data.shop.picks; p.serv = p.serv || {};
-    if (txt(i.value) === '' || clampInt(i.value, 1, 40) === people()) delete p.serv[d.id]; else p.serv[d.id] = clampInt(i.value, 1, 40);
-    changed(true);
-  });
-  return h('label', { class: 'servwrap', onclick: e => { e.preventDefault(); e.stopPropagation(); i.focus(); } }, i, h('small', {}, 'serves'));
+function spendSummary(st) {
+  if (!st.b) return cash(st.spent) + ' spent on dinners so far. Set a budget to see if you are on track.';
+  if (st.over) return 'Over budget by ' + cash(st.spent - st.b) + '.';
+  if (!st.left) return 'All dinners done, ' + cash(st.remain) + ' under budget.';
+  return cash(st.remain) + ' left, about ' + cash(st.each) + ' for each of the ' + st.left + ' dinner' + (st.left === 1 ? '' : 's') + ' to go.';
 }
-function dinnerCard(d, swap) {
-  const P = shopPrices(), sc = dinnerScale(d);
-  return h('details', { class: 'dinner' },
-    h('summary', {},
-      h('span', { class: 't' }, d.name, h('small', {}, [...(d.tags || []), 'about ' + cash(dinnerShare(d))].join(' · '))),
-      swap ? servBox(d) : null,
-      swap ? h('button', { class: 'chip swap', 'aria-label': 'Swap ' + d.name + ' for another dinner', onclick: e => {
-        e.preventDefault(); e.stopPropagation();
-        const ids = currentPlan().map(x => x.id).filter(id => id !== d.id);
-        setPicks(pickPlan(ids, [d.id]));
-      } }, 'Swap') : null),
-    h('ul', { class: 'items' }, d.ingredients.filter(i => P[i.item]).map(i => li(null,
-      h('span', { class: 't' }, P[i.item].name, h('small', {}, useText(i.use * sc, P[i.item].size) + (P[i.item].pantry ? ' · pantry' : ''))),
-      h('span', { class: 'r' }, cash(i.use * sc * itemPrice(P[i.item])))))));
+function dinnerMeter(st) {
+  return meter('Dinners this week', st.b ? st.spent / st.b * 100 : null, cash(st.spent) + (st.b ? ' of ' + cash(st.b) : ''), spendSummary(st), st.over ? 'bad' : null);
 }
+
+/* Shopping list: one row per staple, with a tick box, how-many box and price. */
 function gotMap() {
-  const s = data.shop, week = shopFile ? shopFile.updated || '' : '';
-  if (!s.got || s.got.week !== week) s.got = { week, k: {}, q: {} };
-  if (!s.got.q) s.got.q = {};
+  const s = data.shop, wk = weekStart(today().iso);
+  if (!s.got || s.got.week !== wk) s.got = { week: wk, k: {} };
   return s.got;
 }
-/* One row per thing to buy: tick box, name, how-many box, price. Staple counts are kept; dinner counts reset each week. */
 function shopList() {
-  const plan = currentPlan(), cost = planCost(plan), g = gotMap(), rows = [], pantry = [], money = [];
-  const row = (key, label, sub, getQ, setQ, each, list) => {
-    const c = h('input', { type: 'checkbox', checked: !!g.k[key], 'aria-label': 'Got ' + label });
-    const q = h('input', { type: 'text', inputmode: 'decimal', class: 'dm', value: getQ() || '', placeholder: '0', 'aria-label': 'How many ' + label });
-    const r = h('div', { class: 'row tick' + (g.k[key] ? ' got' : '') }, c,
-      h('span', { class: 't' }, label, sub ? h('small', {}, sub) : null), q,
-      calc(() => each == null ? 'no price' : cash(each * (num(getQ()) || 0)), 'r'));
-    c.addEventListener('change', () => { if (c.checked) g.k[key] = 1; else delete g.k[key]; r.classList.toggle('got', c.checked); changed(); });
-    q.addEventListener('input', () => { setQ(txt(q.value) === '' ? null : Math.max(0, num(q.value))); changed(); });
-    money.push(() => each == null ? 0 : each * (num(getQ()) || 0));
-    list.push(r);
-  };
-  const lineFor = {}; cost.lines.forEach(l => { lineFor[l.p.id] = l; });
-  const merged = {};
+  const g = gotMap(), rows = [], money = [];
   data.shop.staples.filter(st => txt(st.text)).forEach(st => {
-    const p = findPrice(st.text), l = p && !num(st.price) ? lineFor[p.id] : null, key = 's:' + txt(st.text).toLowerCase();
-    if (l) merged[p.id] = 1;
-    const def = () => stQty(st) + (l && !l.p.pantry ? l.packs : 0);
-    row(key, txt(st.text), l ? 'staple, plus ' + (l.p.pantry ? useText(l.need, l.p.size) : l.packs) + ' for dinners' : 'staple',
-      () => g.q[key] != null ? g.q[key] : def(), v => { if (v == null) delete g.q[key]; else g.q[key] = v; }, staplePrice(st), rows);
+    const key = txt(st.text).toLowerCase(), each = staplePrice(st), p = findPrice(st.text);
+    const c = h('input', { type: 'checkbox', checked: !!g.k[key], 'aria-label': 'Got ' + txt(st.text) });
+    const q = h('input', { type: 'text', inputmode: 'decimal', class: 'dm', value: stQty(st), 'aria-label': 'How many ' + txt(st.text) });
+    const sub = [p ? p.size : null, p && p.deal ? p.deal : null, each == null ? 'no price yet' : null].filter(Boolean).join(' · ');
+    const r = h('div', { class: 'row tick' + (g.k[key] ? ' got' : '') }, c, h('span', { class: 't' }, txt(st.text), sub ? h('small', {}, sub) : null), q,
+      calc(() => each == null ? '' : cash(each * stQty(st)), 'r'));
+    c.addEventListener('change', () => { if (c.checked) g.k[key] = 1; else delete g.k[key]; r.classList.toggle('got', c.checked); changed(); });
+    q.addEventListener('input', () => { st.qty = txt(q.value) === '' ? 0 : Math.max(0, num(q.value)); changed(); });
+    rows.push(r);
   });
-  cost.lines.filter(l => !merged[l.p.id]).sort((x, y) => x.p.name.localeCompare(y.p.name)).forEach(l => {
-    const key = 'd:' + l.p.id, def = l.p.pantry ? 0 : l.packs;
-    row(key, l.p.name, (l.p.pantry ? 'dinners use ' + useText(l.need, l.p.size) + ', buy if you are out' : l.p.size + (l.p.deal ? ' · ' + l.p.deal : '')),
-      () => g.q[key] != null ? g.q[key] : def, v => { if (v == null) delete g.q[key]; else g.q[key] = v; }, itemPrice(l.p), l.p.pantry ? pantry : rows);
-  });
-  const total = () => money.reduce((t, f) => t + f(), 0);
   return [
-    rows.length ? h('div', {}, rows) : h('p', { class: 'note' }, 'Nothing to buy yet.'),
-    pantry.length ? [h('h3', {}, 'Check the pantry'), h('div', {}, pantry)] : null,
-    h('p', { class: 'total' }, h('span', {}, 'Shopping list total'), calc(() => cash(total()), null, 'b'))
+    rows.length ? h('div', {}, rows) : h('p', { class: 'note' }, 'No staples yet. Add them in the Shopping tab.'),
+    h('p', { class: 'total' }, h('span', {}, 'Staples total'), calc(() => cash(staplesTotal()), null, 'b'))
   ];
 }
 function shopStatus() {
   if (!shopFile) return shopErr || "Loading this week's prices…";
-  const est = shopFile.prices.filter(p => !p.checked).length;
-  return 'Woolworths prices for ' + (shopFile.week || nice(shopFile.updated)) + (est ? ' (' + est + ' estimated)' : '') + '.' + (shopErr ? ' ' + shopErr : '');
+  return 'Woolworths prices updated ' + nice(shopFile.updated) + '.' + (shopErr ? ' ' + shopErr : '');
 }
 function shopEdit() {
-  const s = data.shop, out = [h('p', { class: 'note' }, shopStatus())];
+  const s = data.shop, st = dinnerStats(), out = [];
   const n = (key, label, lo, hi) => {
     const i = h('input', { type: 'text', inputmode: 'decimal', class: 'amt', value: s[key], 'aria-label': label });
     i.addEventListener('change', () => { s[key] = hi ? clampInt(i.value, lo, hi) : Math.max(0, num(i.value)); changed(true); });
     return i;
   };
-  out.push(setting('Dinner budget a week $', n('budget', 'Dinner budget a week')), setting('Dinners a week', n('nights', 'Dinners a week', 1, 14)), setting('Servings per dinner', n('people', 'Servings per dinner', 1, 20)),
-    shopFile ? h('p', { class: 'note' }, calc(() => { const pl = currentPlan(); return pl.length + ' dinners, ' + pl.reduce((t, d) => t + servingsFor(d), 0) + ' servings this week. Change a dinner\'s servings below for leftovers or guests.'; })) : null);
-  if (shopFile) {
-    const plan = currentPlan(), cost = planCost(plan), b = num(s.budget), over = b && cost.total > b + 1e-9;
-    out.push(h('h3', {}, "This week's dinners"), h('div', {}, plan.map(d => dinnerCard(d, true))),
-      h('p', { class: 'total' }, h('span', {}, 'Dinner shop' + (b ? ' · budget ' + cash(b) : ''), h('small', { style: 'display:block;font-size:12px' }, 'Whole packs, plus a share of pantry items')), h('b', { class: over ? 'bad' : null }, cash(cost.total))),
-      over ? h('p', { class: 'note' }, 'No mix of ' + plan.length + ' dinners fits the budget this week. This is the cheapest mix found.') : null,
-      h('button', { class: 'add', onclick: () => setPicks(pickPlan()) }, 'New dinner ideas'));
-  }
+  out.push(h('h3', {}, 'Dinners this week · from ' + nice(spendWeek().week)),
+    setting('Dinner budget a week $', n('budget', 'Dinner budget a week')),
+    setting('Dinners a week', n('nights', 'Dinners a week', 1, 14)));
+  st.slots.forEach((x, i) => {
+    const name = field(x, 'name', 'text', 'Dinner ' + (i + 1), 'grow');
+    const spent = h('input', { type: 'text', inputmode: 'decimal', class: 'amt', value: x.spent == null ? '' : x.spent, placeholder: '$ spent', 'aria-label': 'Spent on dinner ' + (i + 1) });
+    spent.addEventListener('input', () => { x.spent = txt(spent.value) === '' ? null : num(spent.value); changed(); });
+    out.push(h('div', { class: 'row' }, h('span', { class: 'k' }, (i + 1) + '.'), name, spent));
+  });
+  out.push(h('div', { style: 'margin-top:10px' }, (() => { const box = h('div'); const f = () => { box.textContent = ''; box.append(dinnerMeter(dinnerStats())); }; f(); derived.push(f); return box; })()));
+  const hist = (s.history || []).slice(0, 6);
+  if (hist.length) out.push(h('h3', {}, 'Previous weeks'), items(hist.map(w => li(null,
+    h('span', { class: 't' }, 'Week from ' + nice(w.week)),
+    h('span', { class: 'r' + (w.budget && w.spent > w.budget ? ' bad' : '') }, h('b', {}, cash(w.spent)), w.budget ? 'of ' + cash(w.budget) : ''))), ''));
   out.push(h('h3', {}, 'Weekly staples'),
-    h('p', { class: 'note' }, 'Pick an item from the suggestions to price it automatically, or type your own price.'),
+    h('p', { class: 'note' }, 'Pick an item from the suggestions to use its Woolworths price, which is checked every Wednesday, or type your own price. ' + shopStatus()),
     h('datalist', { id: 'shopItems' }, ((shopFile && shopFile.prices) || []).map(p => h('option', { value: p.name }))),
     list(s.staples, [
       it => { const i = field(it, 'text', 'text', 'Item', 'grow'); i.setAttribute('list', 'shopItems'); i.addEventListener('change', () => changed(true)); return i; },
@@ -687,28 +638,16 @@ function shopEdit() {
         if (!num(it.price)) i.value = ''; if (p) i.placeholder = itemPrice(p).toFixed(2); i.setAttribute('aria-label', 'Price each, blank uses the Woolworths price'); return i; },
       it => calc(() => { const p = staplePrice(it); return p == null ? 'no price' : cash(p * stQty(it)); })
     ], () => ({ text: '', qty: 1, price: 0 }), { empty: 'No staples yet.', add: '+ Add staple' }),
-    h('p', { class: 'note' }, calc(() => 'Staples total: ' + cash(staplesTotal()))));
-  if (shopFile) {
-    out.push(h('h3', {}, 'Shopping list'), shopList());
-    const prices = shopFile.prices.slice().sort((a, b) => a.name.localeCompare(b.name));
-    out.push(h('details', { class: 'prices' }, h('summary', {}, 'Prices this week'),
-      h('p', { class: 'note' }, 'Type a price to correct one. Clear it to go back to the Woolworths price. "est." means not checked yet.'),
-      prices.map(p => {
-        const i = h('input', { type: 'text', inputmode: 'decimal', class: 'amt', placeholder: num(p.price).toFixed(2), value: s.overrides[p.id] != null ? s.overrides[p.id] : '', 'aria-label': 'Price of ' + p.name });
-        i.addEventListener('change', () => { if (txt(i.value) === '') delete s.overrides[p.id]; else s.overrides[p.id] = num(i.value); changed(true); });
-        return h('div', { class: 'row' }, h('span', { class: 't' }, p.name, h('small', {}, [p.size, p.deal, p.checked ? null : 'est.'].filter(Boolean).join(' · '))), i);
-      })));
-  }
+    h('p', { class: 'total' }, h('span', {}, 'Staples total'), calc(() => cash(staplesTotal()), null, 'b')));
   return out;
 }
 let shopListOpen = false;
 try { shopListOpen = localStorage.getItem('life-shoplist') === '1'; } catch (e) {}
 function shopOverview() {
-  if (!shopFile) return h('p', { class: 'note' }, shopStatus());
-  const plan = currentPlan(), cost = planCost(plan), st = staplesTotal(), b = num(data.shop.budget);
+  const st = dinnerStats();
   return [
-    items(plan.map(d => li(null, h('i', { class: 'dot' }), h('span', { class: 't' }, d.name), h('span', { class: 'r' }, cash(dinnerShare(d))))), 'No dinner ideas this week.'),
-    h('p', { class: 'total' }, h('span', {}, 'Weekly shop', h('small', { style: 'display:block;font-size:12px' }, plan.reduce((t, d) => t + servingsFor(d), 0) + ' servings · dinners ' + cash(cost.total) + (b ? ' of ' + cash(b) : '') + ' · staples ' + cash(st))), h('b', { class: b && cost.total > b + 1e-9 ? 'bad' : null }, cash(cost.total + st))),
+    dinnerMeter(st),
+    h('p', { class: 'total' }, h('span', {}, 'This week so far', h('small', { style: 'display:block;font-size:12px' }, 'Dinners ' + cash(st.spent) + ' · staples ' + cash(staplesTotal()))), h('b', {}, cash(st.spent + staplesTotal()))),
     h('button', { class: 'toggle shoptoggle', 'aria-expanded': String(shopListOpen), onclick: () => {
       shopListOpen = !shopListOpen; try { localStorage.setItem('life-shoplist', shopListOpen ? '1' : '0'); } catch (e) {}
       const y = window.scrollY; render(); window.scrollTo(0, y); const t = document.querySelector('.shoptoggle'); if (t) t.focus({ preventScroll: true });
