@@ -67,12 +67,12 @@
   },
   {
    "id": "greek-yoghurt",
-   "name": "Jalna Greek natural yoghurt",
-   "size": "1kg",
-   "price": 8.5,
+   "name": "Jalna Greek natural yoghurt (big tub)",
+   "size": "2kg",
+   "price": 15.0,
    "deal": null,
    "checked": false,
-   "url": "https://www.grocerize.com.au/product/7471701295187/jalna-greek-style-natural-yoghurt-1kg",
+   "url": null,
    "pantry": false
   },
   {
