@@ -638,6 +638,12 @@ function shopEdit() {
         if (!num(it.price)) i.value = ''; if (p) i.placeholder = itemPrice(p).toFixed(2); i.setAttribute('aria-label', 'Price each, blank uses the Woolworths price'); return i; },
       it => calc(() => { const p = staplePrice(it); return p == null ? 'no price' : cash(p * stQty(it)); })
     ], () => ({ text: '', qty: 1, price: 0 }), { empty: 'No staples yet.', add: '+ Add staple' }),
+    (() => {
+      const have = new Set(s.staples.map(x => txt(x.text).toLowerCase()));
+      const missing = ((shopFile && shopFile.prices) || []).filter(p => !have.has(p.name.toLowerCase()));
+      return missing.length ? h('button', { class: 'add', onclick: () => { missing.forEach(p => s.staples.push({ text: p.name, qty: 1, price: 0 })); changed(true); } },
+        '+ Add the ' + missing.length + ' price-checked item' + (missing.length === 1 ? '' : 's') + ' not on your list') : null;
+    })(),
     h('p', { class: 'total' }, h('span', {}, 'Staples total'), calc(() => cash(staplesTotal()), null, 'b')));
   return out;
 }
