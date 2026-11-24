@@ -551,7 +551,7 @@ function spendWeek() {
   const s = data.shop, wk = weekStart(today().iso);
   if (!s.spend || typeof s.spend !== 'object' || !Array.isArray(s.spend.slots)) s.spend = { week: wk, slots: [] };
   if (s.spend.week !== wk) {
-    const spent = s.spend.slots.reduce((t, x) => t + num(x.spent), 0);
+    const spent = s.spend.slots.reduce((t, x) => t + num(x.spent), 0) + staplesTotal();
     if (s.spend.slots.some(x => txt(x.spent) !== '' && x.spent != null)) {
       s.history = (s.history || []).filter(x => x.week !== s.spend.week);
       s.history.unshift({ week: s.spend.week, spent, budget: num(s.budget), dinners: s.spend.slots.length });
@@ -565,18 +565,19 @@ function spendWeek() {
 }
 function dinnerStats() {
   const sp = spendWeek(), slots = sp.slots.slice(0, dinnerCount()), b = num(data.shop.budget);
-  const filled = slots.filter(x => x.spent != null && txt(x.spent) !== ''), spent = filled.reduce((t, x) => t + num(x.spent), 0);
-  const left = slots.length - filled.length, remain = b - spent;
-  return { slots, spent, b, left, remain, each: left ? remain / left : 0, over: b && spent > b + 1e-9 };
+  const filled = slots.filter(x => x.spent != null && txt(x.spent) !== ''), dinners = filled.reduce((t, x) => t + num(x.spent), 0);
+  const staples = staplesTotal(), spent = dinners + staples, left = slots.length - filled.length, remain = b - spent;
+  return { slots, dinners, staples, spent, b, left, remain, each: left ? remain / left : 0, over: b && spent > b + 1e-9 };
 }
 function spendSummary(st) {
-  if (!st.b) return cash(st.spent) + ' spent on dinners so far. Set a budget to see if you are on track.';
+  if (!st.b) return cash(st.spent) + ' so far. Set a weekly budget to see if you are on track.';
   if (st.over) return 'Over budget by ' + cash(st.spent - st.b) + '.';
   if (!st.left) return 'All dinners done, ' + cash(st.remain) + ' under budget.';
-  return cash(st.remain) + ' left, about ' + cash(st.each) + ' for each of the ' + st.left + ' dinner' + (st.left === 1 ? '' : 's') + ' to go.';
+  if (st.each < 0) return 'Staples and dinners so far use the whole budget.';
+  return cash(st.remain) + ' left after staples, about ' + cash(st.each) + ' for each of the ' + st.left + ' dinner' + (st.left === 1 ? '' : 's') + ' to go.';
 }
 function dinnerMeter(st) {
-  return meter('Dinners this week', st.b ? st.spent / st.b * 100 : null, cash(st.spent) + (st.b ? ' of ' + cash(st.b) : ''), spendSummary(st), st.over ? 'bad' : null);
+  return meter('Food this week · staples ' + cash(st.staples) + ' + dinners ' + cash(st.dinners), st.b ? st.spent / st.b * 100 : null, cash(st.spent) + (st.b ? ' of ' + cash(st.b) : ''), spendSummary(st), st.over ? 'bad' : null);
 }
 
 /* Shopping list: one row per staple, with a tick box, how-many box and price. */
@@ -614,8 +615,9 @@ function shopEdit() {
     i.addEventListener('change', () => { s[key] = hi ? clampInt(i.value, lo, hi) : Math.max(0, num(i.value)); changed(true); });
     return i;
   };
-  out.push(h('h3', {}, 'Dinners this week · from ' + nice(spendWeek().week)),
-    setting('Dinner budget a week $', n('budget', 'Dinner budget a week')),
+  out.push(h('h3', {}, 'This week · from ' + nice(spendWeek().week)),
+    setting('Weekly food budget $', n('budget', 'Weekly food budget')),
+    h('p', { class: 'note' }, 'Covers your staples list and what you spend on dinners.'),
     setting('Dinners a week', n('nights', 'Dinners a week', 1, 14)));
   st.slots.forEach((x, i) => {
     const name = field(x, 'name', 'text', 'Dinner ' + (i + 1), 'grow');
@@ -653,7 +655,6 @@ function shopOverview() {
   const st = dinnerStats();
   return [
     dinnerMeter(st),
-    h('p', { class: 'total' }, h('span', {}, 'This week so far', h('small', { style: 'display:block;font-size:12px' }, 'Dinners ' + cash(st.spent) + ' · staples ' + cash(staplesTotal()))), h('b', {}, cash(st.spent + staplesTotal()))),
     h('button', { class: 'toggle shoptoggle', 'aria-expanded': String(shopListOpen), onclick: () => {
       shopListOpen = !shopListOpen; try { localStorage.setItem('life-shoplist', shopListOpen ? '1' : '0'); } catch (e) {}
       const y = window.scrollY; render(); window.scrollTo(0, y); const t = document.querySelector('.shoptoggle'); if (t) t.focus({ preventScroll: true });
